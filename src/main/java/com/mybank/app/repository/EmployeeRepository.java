@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import com.mybank.app.entity.Employee;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-	
-	@Query(value = "SELECT e FROM employee e WHERE e.employee_name=:employeeName" , nativeQuery=true)
-	public Employee getEmployeeByEmployeeNameId(@Param("employeeName") String employeeName);
+
+	@Query(value = "SELECT * FROM employee e WHERE e.employee_user_name=:employeeUserName", nativeQuery = true)
+	public Employee findEmployeeByEmployeeUserName(@Param("employeeUserName") String employeeUserName);
 }

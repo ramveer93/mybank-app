@@ -35,6 +35,9 @@ public class Employee {
 	@JoinTable(name = "empl_role", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<EmployeeRole> roles = new HashSet<>();
 
+	@Column(name = "employee_user_name")
+	private String employeeUserName;
+
 	@Column(name = "bank_id")
 	private Long bankId;
 
@@ -156,14 +159,13 @@ public class Employee {
 		this.deleted = deleted;
 	}
 
-	@Override
-	public String toString() {
-		return "Employee [id=" + id + ", roles=" + roles + ", bankId=" + bankId + ", designation=" + designation
-				+ ", employeeFirstName=" + employeeFirstName + ", employeeMiddleName=" + employeeMiddleName
-				+ ", employeeLastName=" + employeeLastName + ", password=" + password + ", createdOn=" + createdOn
-				+ ", updatedOn=" + updatedOn + ", deleted=" + deleted + "]";
+	public String getEmployeeUserName() {
+		return employeeUserName;
 	}
-	
+
+	public void setEmployeeUserName(String employeeUserName) {
+		this.employeeUserName = employeeUserName;
+	}
 
 	public void validateInput() {
 		try {
@@ -174,6 +176,9 @@ public class Employee {
 			Assert.hasLength(this.getPassword(), "Employee's password can't be null");
 			Assert.notNull(this.getRoles(), "Employee's role can't be null");
 			Assert.isTrue(!this.getRoles().isEmpty(), "Employee's role array can't be empty");
+			Assert.isTrue(this.getEmployeeFirstName().length() >= 3,
+					"Employee's first name mush have length at least 3");
+			Assert.isTrue(this.getEmployeeLastName().length() >= 3, "Employee's last name mush have length at least 3");
 			Set<EmployeeRole> roles = this.getRoles();
 			for (EmployeeRole role : roles) {
 				Assert.hasLength(role.getName(), "Employee's role name can't be null or empty");
@@ -184,5 +189,21 @@ public class Employee {
 		}
 	}
 
+	public void setEmployeeUserName() {
+		String employeeUserName = this.getEmployeeFirstName().substring(0, 3)
+				+ this.getEmployeeLastName().substring(0, 3) + this.getId();
+		this.setEmployeeUserName(employeeUserName);
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", roles=" + roles + ", employeeUserName=" + employeeUserName + ", bankId="
+				+ bankId + ", designation=" + designation + ", employeeFirstName=" + employeeFirstName
+				+ ", employeeMiddleName=" + employeeMiddleName + ", employeeLastName=" + employeeLastName
+				+ ", password=" + password + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted="
+				+ deleted + "]";
+	}
+
+	
 
 }

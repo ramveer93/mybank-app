@@ -24,7 +24,7 @@ public class AuthorizedService {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-	public void authorizeUser() {
+	public void authorizeUser(String roleType) {
 		this.LOGGER.info("Request came to perform authorization of logged in user");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUser = authentication.getName();
@@ -35,11 +35,11 @@ public class AuthorizedService {
 		for (EmployeeRole role : roles) {
 			list.add(role.getName());
 		}
-		if (!list.contains("ADMIN")) {
-			this.LOGGER.error("logged in user {} doesn't have ADMIN role so not allowed to perform this operation ",
-					loggedInUser);
+		if (!list.contains(roleType)) {
+			this.LOGGER.error("logged in user {} doesn't have {} role so not allowed to perform this operation ",
+					loggedInUser,roleType);
 			throw new InsufficientAuthenticationException(
-					"Logged in user doesn't have role as ADMIN Hence not allowed to perform this request");
+					"Logged in user doesn't have role as "+roleType+ " Hence not allowed to perform this request");
 		}
 		this.LOGGER.info("logged user {} is authorized successfully !!", loggedInUser);
 	}

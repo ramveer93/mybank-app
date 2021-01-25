@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,8 +39,9 @@ public class Employee {
 	@Column(name = "employee_user_name")
 	private String employeeUserName;
 
-	@Column(name = "bank_id")
-	private Long bankId;
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "emp_bank_id")
+	private Bank bank;
 
 	@Column(name = "designation")
 	private String designation;
@@ -85,14 +87,6 @@ public class Employee {
 
 	public void setRoles(Set<EmployeeRole> roles) {
 		this.roles = roles;
-	}
-
-	public Long getBankId() {
-		return bankId;
-	}
-
-	public void setBankId(Long bankId) {
-		this.bankId = bankId;
 	}
 
 	public String getDesignation() {
@@ -167,6 +161,14 @@ public class Employee {
 		this.employeeUserName = employeeUserName;
 	}
 
+	public Bank getBank() {
+		return bank;
+	}
+
+	public void setBank(Bank bank) {
+		this.bank = bank;
+	}
+	
 	public void validateInput() {
 		try {
 			Assert.notNull(this, "Employee object can't be null");
@@ -185,7 +187,6 @@ public class Employee {
 			}
 		} catch (IllegalArgumentException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
-
 		}
 	}
 
@@ -197,13 +198,9 @@ public class Employee {
 
 	@Override
 	public String toString() {
-		return "Employee [id=" + id + ", roles=" + roles + ", employeeUserName=" + employeeUserName + ", bankId="
-				+ bankId + ", designation=" + designation + ", employeeFirstName=" + employeeFirstName
-				+ ", employeeMiddleName=" + employeeMiddleName + ", employeeLastName=" + employeeLastName
-				+ ", password=" + password + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted="
-				+ deleted + "]";
+		return "Employee [id=" + id + ", roles=" + roles + ", employeeUserName=" + employeeUserName + ", bank=" + bank
+				+ ", designation=" + designation + ", employeeFirstName=" + employeeFirstName + ", employeeMiddleName="
+				+ employeeMiddleName + ", employeeLastName=" + employeeLastName + ", password=" + password
+				+ ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted=" + deleted + "]";
 	}
-
-	
-
 }

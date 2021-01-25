@@ -33,6 +33,7 @@ public class AdminService {
 				employee.setUpdatedOn(LocalDateTime.now());
 				employee.setCreatedOn(employeeFromDb.getCreatedOn());
 				employee.setRoles(employeeFromDb.getRoles());
+				employee.setBank(employeeFromDb.getBank());
 				employee = this.empRepo.save(employee);
 				this.LOGGER.info("Successfully update employee details for id {} ",employee.getId());
 				return employee;

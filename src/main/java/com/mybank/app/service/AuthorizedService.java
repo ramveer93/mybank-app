@@ -43,4 +43,13 @@ public class AuthorizedService {
 		}
 		this.LOGGER.info("logged user {} is authorized successfully !!", loggedInUser);
 	}
+
+	public void logoutUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String loggedInUser = authentication.getName();
+		if(loggedInUser == null) {
+			throw new IllegalStateException("User is not logged in");
+		}
+		SecurityContextHolder.clearContext();
+	}
 }

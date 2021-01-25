@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.app.security.AuthRequest;
 import com.mybank.app.security.JwtUtil;
+import com.mybank.app.service.AuthorizedService;
 import com.mybank.app.util.ResponseParser;
 
 @Configuration
@@ -33,6 +34,9 @@ public class AuthenticationController {
 	private JwtUtil jwtUtil;
 	@Autowired
 	private ResponseParser responseParser;
+
+	@Autowired
+	private AuthorizedService authService;
 
 	@RequestMapping(value = "/token", method = RequestMethod.POST, produces = "application/json")
 	public ResponseEntity<Object> getJWTToken(@RequestBody AuthRequest authRequest) {
@@ -55,5 +59,18 @@ public class AuthenticationController {
 					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+	}
+
+	@RequestMapping(value = "/logout", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<Object> logout() {
+		try {
+			this.authService.logoutUser();
+			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.OK.value(),
+					"Successfully logged out", "Successfully logged out"), HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<Object>(
+					this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }

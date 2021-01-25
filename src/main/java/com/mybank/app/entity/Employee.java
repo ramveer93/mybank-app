@@ -18,6 +18,7 @@ import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -31,41 +32,37 @@ public class Employee {
 	private Long id;
 
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinTable(name = "empl_role", joinColumns = @JoinColumn(name = "employee_id"), 
-	inverseJoinColumns = @JoinColumn(name = "role_id"))
+	@JoinTable(name = "empl_role", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<EmployeeRole> roles = new HashSet<>();
-	
-	@Column(name="employee_name" )
-	private String EmployeeName;
-	
+
 	@Column(name = "bank_id")
 	private Long bankId;
-	
+
 	@Column(name = "designation")
 	private String designation;
-	
-	@Column(name = "first_name" )
+
+	@Column(name = "first_name")
 	private String employeeFirstName;
-	
-	@Column(name  = "middle_name")
+
+	@Column(name = "middle_name")
 	private String employeeMiddleName;
-	
-	@Column(name  = "last_name")
+
+	@Column(name = "last_name")
 	private String employeeLastName;
-	
-	@Column(name  = "password")
+
+	@Column(name = "password")
 	private String password;
-	
+
 	@Column(name = "created_on")
 	@DateTimeFormat(iso = ISO.DATE_TIME)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdOn = LocalDateTime.now();
-	
+
 	@Column(name = "updated_on")
 	@DateTimeFormat(iso = ISO.DATE_TIME)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime updatedOn;
-	
+
 	@Column(name = "deleted")
 	@DateTimeFormat(iso = ISO.DATE_TIME)
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -85,14 +82,6 @@ public class Employee {
 
 	public void setRoles(Set<EmployeeRole> roles) {
 		this.roles = roles;
-	}
-
-	public String getEmployeeName() {
-		return EmployeeName;
-	}
-
-	public void setEmployeeName(String employeeName) {
-		EmployeeName = employeeName;
 	}
 
 	public Long getBankId() {
@@ -169,9 +158,31 @@ public class Employee {
 
 	@Override
 	public String toString() {
-		return "Employee [id=" + id + ", roles=" + roles + ", EmployeeName=" + EmployeeName + ", bankId=" + bankId
-				+ ", designation=" + designation + ", employeeFirstName=" + employeeFirstName + ", employeeMiddleName="
-				+ employeeMiddleName + ", employeeLastName=" + employeeLastName + ", password=" + password
-				+ ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted=" + deleted + "]";
+		return "Employee [id=" + id + ", roles=" + roles + ", bankId=" + bankId + ", designation=" + designation
+				+ ", employeeFirstName=" + employeeFirstName + ", employeeMiddleName=" + employeeMiddleName
+				+ ", employeeLastName=" + employeeLastName + ", password=" + password + ", createdOn=" + createdOn
+				+ ", updatedOn=" + updatedOn + ", deleted=" + deleted + "]";
 	}
+	
+
+	public void validateInput() {
+		try {
+			Assert.notNull(this, "Employee object can't be null");
+			Assert.hasLength(this.getDesignation(), "Employee's designation can't be null or empty");
+			Assert.hasLength(this.getEmployeeFirstName(), "Employee's first name can't be null or empty");
+			Assert.hasLength(this.getEmployeeLastName(), "Employee's last name can't be null or empty");
+			Assert.hasLength(this.getPassword(), "Employee's password can't be null");
+			Assert.notNull(this.getRoles(), "Employee's role can't be null");
+			Assert.isTrue(!this.getRoles().isEmpty(), "Employee's role array can't be empty");
+			Set<EmployeeRole> roles = this.getRoles();
+			for (EmployeeRole role : roles) {
+				Assert.hasLength(role.getName(), "Employee's role name can't be null or empty");
+			}
+		} catch (IllegalArgumentException ex) {
+			throw new IllegalArgumentException(ex.getMessage());
+
+		}
+	}
+
+
 }

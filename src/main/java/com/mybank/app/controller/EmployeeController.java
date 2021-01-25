@@ -40,13 +40,21 @@ public class EmployeeController {
 	public ResponseEntity<Object> addBankEmployee(@RequestBody Employee employee) {
 		this.LOGGER.info("add employee called with input {} ", employee.toString());
 		try {
+			employee.validateInput();
 			Employee dbEmployee = this.employeeService.addNewBankEmployee(employee);
 			JSONObject result = jsonUtil.getJsonObjectFromObject(dbEmployee);
 			this.LOGGER.debug("updated employee {} ", employee.toString());
 			return new ResponseEntity<Object>(result.toString(), HttpStatus.CREATED);
+		} catch (IllegalArgumentException ex) {
+			this.LOGGER.error("Invalid input {} ", ex.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), ex.getMessage()),
+					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			this.LOGGER.error("Error occured in add employee {} ", e.getMessage());
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
 	}

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.app.entity.Employee;
 import com.mybank.app.service.AuthorizedService;
-import com.mybank.app.service.EmployeeService;
+import com.mybank.app.service.AdminService;
 import com.mybank.app.util.BankException;
 import com.mybank.app.util.JSONUtil;
 import com.mybank.app.util.ResponseParser;
@@ -26,11 +26,11 @@ import com.mybank.app.util.ResponseParser;
 @Component
 @RestController
 @RequestMapping(value = "/v1/employee")
-public class EmployeeController {
+public class AdminController {
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private EmployeeService employeeService;
+	private AdminService employeeService;
 
 	@Autowired
 	private JSONUtil jsonUtil;

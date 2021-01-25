@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 
 import com.mybank.app.entity.Employee;
 import com.mybank.app.entity.EmployeeRole;
-import com.mybank.app.repository.EmployeeRepository;
+import com.mybank.app.repository.AdminRepository;
 
 @Service
 public class AuthorizedService {
 
 	@Autowired
-	private EmployeeRepository empRepo;
+	private AdminRepository empRepo;
 
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

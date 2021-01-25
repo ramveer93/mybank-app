@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mybank.app.entity.Employee;
-import com.mybank.app.repository.EmployeeRepository;
+import com.mybank.app.repository.AdminRepository;
 import com.mybank.app.util.BankException;
 
 @Service
-public class EmployeeService {
+public class AdminService {
 
 	@Autowired
-	private EmployeeRepository empRepo;
+	private AdminRepository empRepo;
 	
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 

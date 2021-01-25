@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.mybank.app.entity.Employee;
 import com.mybank.app.entity.EmployeeRole;
-import com.mybank.app.service.EmployeeService;
+import com.mybank.app.service.AdminService;
 
 @SpringBootApplication
 public class MybankApplication {
@@ -22,7 +22,7 @@ public class MybankApplication {
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
-	private EmployeeService empService;
+	private AdminService empService;
 
 	@PostConstruct
 	public void initEmployees() {

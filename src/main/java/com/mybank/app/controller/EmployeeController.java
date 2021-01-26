@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.app.entity.Customer;
+import com.mybank.app.entity.KYC;
 import com.mybank.app.service.AuthorizedService;
 import com.mybank.app.service.CustomerService;
 import com.mybank.app.util.BankException;
@@ -116,7 +117,7 @@ public class EmployeeController {
 			@RequestParam("accountIds") Set<Long> accountIds) {
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
-			Customer updatedCustomer = this.customerService.linkCustomerWithAccounts(customerId,accountIds);
+			Customer updatedCustomer = this.customerService.linkCustomerWithAccounts(customerId, accountIds);
 			JSONObject obj = this.jsonUtil.getJsonObjectFromObject(updatedCustomer);
 			return new ResponseEntity<Object>(obj.toString(), HttpStatus.OK);
 		} catch (InsufficientAuthenticationException in) {
@@ -131,5 +132,31 @@ public class EmployeeController {
 		}
 
 	}
-	
+
+	@RequestMapping(value = "/updateKyc", method = RequestMethod.PUT, produces = "application/json")
+	public ResponseEntity<Object> updateCustomerKYC(@RequestParam("customerId") Long customerId, @RequestBody KYC kyc) {
+		try {
+			this.authorizedService.authorizeUser("EMPLOYEE");
+			kyc.validateInput();
+			Customer updatedCustomer = this.customerService.updateKYC(customerId,kyc);
+			JSONObject obj = this.jsonUtil.getJsonObjectFromObject(updatedCustomer);
+			return new ResponseEntity<Object>(obj.toString(), HttpStatus.OK);
+		} catch (IllegalArgumentException ie) {
+			this.LOGGER.error(ie.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.BAD_REQUEST.value(), ie.getMessage(), ie.getMessage()),
+					HttpStatus.BAD_REQUEST);
+		} catch (InsufficientAuthenticationException in) {
+			this.LOGGER.error(in.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
+					HttpStatus.UNAUTHORIZED);
+		} catch (Exception e) {
+			this.LOGGER.error("Error occured in update customer kyc {} ", e.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }

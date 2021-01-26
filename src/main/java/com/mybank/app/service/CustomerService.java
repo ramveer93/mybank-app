@@ -13,9 +13,12 @@ import org.springframework.stereotype.Service;
 import com.mybank.app.entity.Account;
 import com.mybank.app.entity.Bank;
 import com.mybank.app.entity.Customer;
+import com.mybank.app.entity.Document;
+import com.mybank.app.entity.KYC;
 import com.mybank.app.repository.AccountRepository;
 import com.mybank.app.repository.BankRepository;
 import com.mybank.app.repository.CustomerRepository;
+import com.mybank.app.repository.DocumentRepository;
 import com.mybank.app.util.BankException;
 
 @Service
@@ -31,6 +34,9 @@ public class CustomerService {
 
 	@Autowired
 	private AccountRepository accRepo;
+
+	@Autowired
+	private DocumentRepository docRepo;
 
 	public Customer addNewCustomer(Customer customer) {
 		if (customer.getId() != null && customer.getId() != 0) {
@@ -105,6 +111,36 @@ public class CustomerService {
 				customerFromDb.getAccounts().addAll(accounts);
 				customerFromDb = this.customerRepo.save(customerFromDb);
 			}
+		} else {
+			throw new BankException("No customer found with given id");
+		}
+		return customerFromDb;
+	}
+
+	public Customer updateKYC(Long customerId, KYC kyc) {
+		Optional<Customer> customer = this.customerRepo.findById(customerId);
+		Customer customerFromDb = null;
+		if (customer.isPresent()) {
+			customerFromDb = customer.get();
+			KYC kycFromDb = customerFromDb.getKyc();
+			kyc.setKycId(kycFromDb.getKycId());
+			kyc.setUpdatedOn(LocalDateTime.now());
+			Set<Document> inputDocs = kyc.getDocuments();
+
+			for (Document doc : inputDocs) {
+				if (doc != null && doc.getDocId() != null && doc.getDocId() != 0) {
+					Optional<Document> docFromDb = this.docRepo.findById(doc.getDocId());
+					if (docFromDb.isPresent()) {
+						Document dbDoc = docFromDb.get();
+						kyc.getDocuments().remove(doc);
+						kyc.getDocuments().add(dbDoc);
+					}else {
+						throw new BankException("No Document found with given id "+doc.getDocId()) ;
+					}
+				} 
+			}
+			customerFromDb.setKyc(kyc);
+			customerFromDb = this.customerRepo.save(customerFromDb);
 		} else {
 			throw new BankException("No customer found with given id");
 		}

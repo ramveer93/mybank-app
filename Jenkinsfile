@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage ('Initialize') {
             steps {
-                bat '''
+                sh '''
                     echo "PATH = ${PATH}"
                     echo "M2_HOME = ${M2_HOME}"
                 '''
@@ -21,7 +21,7 @@ pipeline {
 
         stage ('Build') {
             steps {
-                bat 'mvn -Dmaven.test.failure.ignore=true install' 
+                sh 'mvn -Dmaven.test.failure.ignore=true install' 
             }
             post {
                 success {
@@ -31,7 +31,7 @@ pipeline {
         }
         stage ('Test') {
             steps {
-                bat 'mvn clean install' 
+                sh 'mvn clean install' 
             }
         }
         stage('Building Docker image'){

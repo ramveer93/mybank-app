@@ -3,6 +3,7 @@ package com.mybank.app.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class AccountService {
 
 		AccountType accType = account.getAccType();
 
-		if (accType != null && accType.getCode()!=null && accType.getCode() != 0) {
+		if (accType != null && accType.getCode() != null && accType.getCode() != 0) {
 			// acc type code found so not creating new type
 			LOGGER.info("Found AccountTypeCode in req so not creating new ac type");
 			Optional<AccountType> accountFromDb = this.accTypeCodeRepo.findById(accType.getCode());
@@ -87,6 +88,20 @@ public class AccountService {
 		account = this.accountRepo.save(account);
 		this.LOGGER.info("Successfully updated existing account");
 		return account;
+	}
+
+	public JSONObject getAccountBalance(Long accountId) {
+		Optional<Account> accountFromDb = this.accountRepo.findById(accountId);
+		if (accountFromDb.isPresent()) {
+			Account dbAccount = accountFromDb.get();
+			JSONObject result = new JSONObject();
+			double balance = dbAccount.getBalance();
+			result.put("balance", balance);
+			result.put("accountType", dbAccount.getAccType().getName());
+			return result;
+		} else {
+			throw new BankException("Account with given id " + accountId + " not found, No record will be created ");
+		}
 	}
 
 }

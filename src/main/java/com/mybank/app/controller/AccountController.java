@@ -10,6 +10,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.app.entity.Account;
@@ -33,10 +34,9 @@ public class AccountController {
 
 	@Autowired
 	private AuthorizedService authorizedService;
-    
+
 	@Autowired
 	private AccountService accService;
-	
 
 	@RequestMapping(value = "/createAccount", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
 	public ResponseEntity<Object> createNewAccount(@RequestBody Account account) {
@@ -65,5 +65,23 @@ public class AccountController {
 		}
 
 	}
-	
+
+	@RequestMapping(value = "/getBalance", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<Object> getAccountBalance(@RequestParam("accountId") Long accountId) {
+		try {
+			this.authorizedService.authorizeUser("EMPLOYEE");
+			JSONObject result = this.accService.getAccountBalance(accountId);
+			return new ResponseEntity<Object>(result.toString(), HttpStatus.OK);
+		} catch (InsufficientAuthenticationException in) {
+			this.LOGGER.error(in.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
+					HttpStatus.UNAUTHORIZED);
+		} catch (Exception ex) {
+			this.LOGGER.info("Error occured in get customer  {} ", ex.getMessage());
+			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }

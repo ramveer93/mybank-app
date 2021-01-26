@@ -19,6 +19,11 @@ public class TransactionTypeCodes {
 	@Column(name = "transaction_code_name")
 	private String transactionCodeName;
 	
+	
+	public TransactionTypeCodes() {
+		super();
+	}
+
 	public TransactionTypeCodes(String transactionCodeName) {
 		super();
 		this.transactionCodeName = transactionCodeName;

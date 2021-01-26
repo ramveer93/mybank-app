@@ -1,9 +1,15 @@
 package com.mybank.app.controller;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -13,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
 import com.mybank.app.entity.Account;
+import com.mybank.app.entity.Transaction;
 import com.mybank.app.service.AccountService;
 import com.mybank.app.service.AuthorizedService;
 import com.mybank.app.util.JSONUtil;
@@ -102,6 +110,35 @@ public class AccountController {
 					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+	}
+
+	@RequestMapping(value = "/accountStatement", method = RequestMethod.GET,produces = "application/json")
+	public ResponseEntity<Object> printAccountStatement(@RequestParam("accountId") Long accountId,
+			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+			@RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+		try {
+			this.authorizedService.authorizeUser("EMPLOYEE");
+			List<Transaction> list = this.accService.printAccountStatement(accountId, startDate, endDate);
+			Gson gson = new Gson();
+			String json = gson.toJson(list);
+			return new ResponseEntity<Object>(json, HttpStatus.OK);
+		} catch (InsufficientAuthenticationException in) {
+			this.LOGGER.error(in.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
+					HttpStatus.UNAUTHORIZED);
+		} catch (Exception ex) {
+			this.LOGGER.info("Error occured in account statement  {} ", ex.getMessage());
+			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@RequestMapping("/generateReport")
+	public void generatePDFReport(HttpServletResponse response, @RequestParam("accountId") Long accountId,
+			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+			@RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+		response = this.accService.printReport(accountId, startDate, endDate, response);
 	}
 
 }

@@ -58,9 +58,9 @@ public class Account {
 //	@JoinColumn(name = "ac_transaction_id")
 //	private List<Transaction> transactions = new ArrayList<>();
 	
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "ac_trans_id", referencedColumnName = "acc_id")
-	private Set<Transaction> transactionsSet = new HashSet<>();
+//	@OneToMany(cascade = CascadeType.ALL)
+//	@JoinColumn(name = "ac_trans_id", referencedColumnName = "acc_id")
+//	private Set<Transaction> transactionsSet = new HashSet<>();
 
 	@Column(name = "created_on")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -152,13 +152,13 @@ public class Account {
 		this.bank = bank;
 	}
 
-	public Set<Transaction> getTransactionsSet() {
-		return transactionsSet;
-	}
-
-	public void setTransactionsSet(Set<Transaction> transactionsSet) {
-		this.transactionsSet = transactionsSet;
-	}
+//	public Set<Transaction> getTransactionsSet() {
+//		return transactionsSet;
+//	}
+//
+//	public void setTransactionsSet(Set<Transaction> transactionsSet) {
+//		this.transactionsSet = transactionsSet;
+//	}
 
 	public void validateInput() {
 		try {

@@ -50,6 +50,11 @@ public class Transaction {
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "trans_trans_type_codes")
 	private TransactionTypeCodes transTypeCodes;
+	
+	
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "trans_acc_id")
+	private Account account;
 
 	@Column(name = "created_on")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -163,13 +168,22 @@ public class Transaction {
 		this.isDebit = isDebit;
 	}
 
+	public Account getAccount() {
+		return account;
+	}
+
+	public void setAccount(Account account) {
+		this.account = account;
+	}
+
 	@Override
 	public String toString() {
 		return "Transaction [id=" + id + ", amount=" + amount + ", status=" + status + ", receipt=" + receipt
 				+ ", isCredit=" + isCredit + ", isDebit=" + isDebit + ", transTypeCodes=" + transTypeCodes
-				+ ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted=" + deleted
-				+ ", transactionEndDate=" + transactionEndDate + "]";
+				+ ", account=" + account + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted="
+				+ deleted + ", transactionEndDate=" + transactionEndDate + "]";
 	}
+
 
 	
 

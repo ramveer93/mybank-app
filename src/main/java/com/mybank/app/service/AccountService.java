@@ -1,16 +1,19 @@
 package com.mybank.app.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +22,14 @@ import com.mybank.app.entity.AccountType;
 import com.mybank.app.entity.Bank;
 import com.mybank.app.entity.Transaction;
 import com.mybank.app.entity.TransactionTypeCodes;
+import com.mybank.app.reporting.ReportingUtil;
 import com.mybank.app.repository.AccountRepository;
 import com.mybank.app.repository.AccountTypeCodeRepository;
 import com.mybank.app.repository.BankRepository;
 import com.mybank.app.repository.TransactionRepository;
 import com.mybank.app.util.BankException;
+import com.mybank.app.util.Constants;
+import com.mybank.app.util.JSONUtil;
 
 @Service
 public class AccountService {
@@ -40,7 +46,13 @@ public class AccountService {
 	private AccountTypeCodeRepository accTypeCodeRepo;
 
 	@Autowired
+	private JSONUtil jsonUtil;
+
+	@Autowired
 	private TransactionRepository transactionRepo;
+
+	@Autowired
+	private ReportingUtil reportUtil;
 
 	public Account createNewAccount(Account account) {
 		this.LOGGER.info("Account service got request to create new account");
@@ -57,7 +69,7 @@ public class AccountService {
 				account.setUpdatedOn(LocalDateTime.now());
 				account.setCreatedOn(dbAccount.getCreatedOn());
 				account.setAccType(dbAccount.getAccType());
-				account.setTransactionsSet(dbAccount.getTransactionsSet());
+				// account.setTransactionsSet(dbAccount.getTransactionsSet());
 				account = this.accountRepo.save(account);
 				this.LOGGER.info("Successfully updated existing account");
 				return account;
@@ -135,12 +147,20 @@ public class AccountService {
 				debitTrans.setReceipt("Receipt: Money of " + money + " got debited from your ac");
 				debitTrans.setStatus("Success");
 				debitTrans.setTransactionEndDate(LocalDateTime.now());
+				debitTrans.setAccount(sourceAccount);
 				debitTrans = this.transactionRepo.save(debitTrans);
+				try {
+					JSONObject jsonObj = jsonUtil.getJsonObjectFromObject(debitTrans);
+					System.out.println(jsonObj.toString());
+				} catch (Exception e) {
+
+				}
 
 				sourceAccount.setBalance(sourceAccount.getBalance() - money);
-				Set<Transaction> sourceTransSet = new HashSet<>();
-				sourceTransSet.add(debitTrans);
-				sourceAccount.setTransactionsSet(sourceTransSet);
+//				Set<Transaction> sourceTransSet = new HashSet<>();
+//				sourceTransSet.add(debitTrans);
+				// sourceAccount.setTransactionsSet(sourceTransSet);
+				sourceAccount.setUpdatedOn(LocalDateTime.now());
 				sourceAccount = this.accountRepo.save(sourceAccount);// commit to source
 
 				// credit
@@ -150,13 +170,15 @@ public class AccountService {
 				creditTrans.setCredit(true);
 				creditTrans.setReceipt("Receipt: Money of " + money + " credited to your ac");
 				creditTrans.setStatus("Success");
+				creditTrans.setAccount(targetAccount);
 				creditTrans.setTransactionEndDate(LocalDateTime.now());
 				creditTrans = this.transactionRepo.save(creditTrans);
 
 				targetAccount.setBalance(targetAccount.getBalance() + money);
-				Set<Transaction> targetTransSet = new HashSet<>();
-				targetTransSet.add(creditTrans);
-				targetAccount.setTransactionsSet(targetTransSet);
+				// Set<Transaction> targetTransSet = new HashSet<>();
+				// targetTransSet.add(creditTrans);
+				// targetAccount.setTransactionsSet(targetTransSet);
+				targetAccount.setUpdatedOn(LocalDateTime.now());
 				targetAccount = this.accountRepo.save(targetAccount);
 				result.put("status", "Success");
 				result.put("sourceTransactionId", debitTrans.getId());
@@ -166,6 +188,40 @@ public class AccountService {
 		} else {
 			throw new BankException("Either source or target account doesn't exists,not able to make the transaction");
 		}
+	}
+
+	// @Scheduled(cron = "* */2 * * * *", zone = "Asia/Calcutta")
+	public void calculateInterest() {
+		LOGGER.info("Scheduler started at {} ", LocalDateTime.now());
+		List<Account> accounts = this.accountRepo.findAll();
+		LOGGER.info("total accounts found {} , schedular will update interest earned for every accont",
+				accounts.size());
+		for (Account account : accounts) {
+			long daysDiff = Duration.between(account.getCreatedOn(), LocalDateTime.now()).toDays();
+			double time = daysDiff / 365;
+			double interestEarned = calculateInterest(account.getBalance(), time, Constants.INTEREST_RATE);
+			LOGGER.info(" time {} , interest earned {}, balance before update {} ", time, interestEarned,
+					account.getBalance());
+			account.setBalance(account.getBalance() + interestEarned);
+			account.setUpdatedOn(LocalDateTime.now());
+			LOGGER.info("Balance after update {} ", account.getBalance());
+			account = this.accountRepo.save(account);
+		}
+	}
+
+	private double calculateInterest(double principal, double time, double rate) {
+		return principal * time * rate / 100;
+	}
+
+	public List<Transaction> printAccountStatement(Long accountId, LocalDateTime startDate, LocalDateTime endDate) {
+		List<Transaction> transactions = this.transactionRepo.findInDateRange(accountId, startDate);
+		return transactions;
+	}
+
+	public HttpServletResponse printReport(Long accountId, LocalDateTime startDate, LocalDateTime endDate,
+			HttpServletResponse response) {
+		List<Transaction> transactions = this.transactionRepo.findInDateRange(accountId, startDate);
+		return this.reportUtil.generateReport(transactions, "firstReport.pdf", response);
 	}
 
 }

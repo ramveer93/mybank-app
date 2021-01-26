@@ -11,12 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.mybank.app.entity.Employee;
 import com.mybank.app.entity.EmployeeRole;
 import com.mybank.app.service.AdminService;
 
 @SpringBootApplication
+@EnableScheduling
 public class MybankApplication {
     
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

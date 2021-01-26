@@ -22,6 +22,11 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 @Entity
 @Table(name = "employee")
@@ -59,18 +64,21 @@ public class Employee {
 	private String password;
 
 	@Column(name = "created_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime createdOn = LocalDateTime.now();
 
 	@Column(name = "updated_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime updatedOn;
 
 	@Column(name = "deleted")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
 
 	public Long getId() {
@@ -168,7 +176,7 @@ public class Employee {
 	public void setBank(Bank bank) {
 		this.bank = bank;
 	}
-	
+
 	public void validateInput() {
 		try {
 			Assert.notNull(this, "Employee object can't be null");

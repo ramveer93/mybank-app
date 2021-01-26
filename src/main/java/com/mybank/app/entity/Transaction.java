@@ -17,6 +17,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 @Entity
 @Table(name = "transactions")
@@ -41,19 +45,29 @@ public class Transaction {
 	private TransactionTypeCodes transTypeCodes;
 	
 	@Column(name = "created_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime createdOn = LocalDateTime.now();
 
 	@Column(name = "updated_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime updatedOn;
 
 	@Column(name = "deleted")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
+	
+	
+	@Column(name = "end_date")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
+	private LocalDateTime transactionEndDate;
 	
 
 	public Long getId() {
@@ -120,10 +134,20 @@ public class Transaction {
 		this.transTypeCodes = transTypeCodes;
 	}
 
+	public LocalDateTime getTransactionEndDate() {
+		return transactionEndDate;
+	}
+
+	public void setTransactionEndDate(LocalDateTime transactionEndDate) {
+		this.transactionEndDate = transactionEndDate;
+	}
+
 	@Override
 	public String toString() {
 		return "Transaction [id=" + id + ", amount=" + amount + ", status=" + status + ", receipt=" + receipt
 				+ ", transTypeCodes=" + transTypeCodes + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn
-				+ ", deleted=" + deleted + "]";
+				+ ", deleted=" + deleted + ", transactionEndDate=" + transactionEndDate + "]";
 	}
+
+	
 }

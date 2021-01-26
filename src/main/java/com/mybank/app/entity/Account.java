@@ -21,6 +21,10 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 @Entity
 @Table(name = "account")
@@ -53,18 +57,21 @@ public class Account {
 	private List<Transaction> transactions = new ArrayList<>();
 
 	@Column(name = "created_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime createdOn = LocalDateTime.now();
 
 	@Column(name = "updated_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime updatedOn;
 
 	@Column(name = "deleted")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
 
 	public Long getAccId() {
@@ -162,9 +169,12 @@ public class Account {
 			Assert.hasLength(this.getAccType().getName(), "Account type name can't be null or empty");
 			Assert.notNull(this.getBank(), "Account bank can't be null or empty");
 			Assert.hasLength(String.valueOf(this.getInterestRate()), "Account interest rate can't be null or empty");
-			Assert.hasLength(this.getBank().getBankAddress(), "Bank address can't be null or empty");
-			Assert.hasLength(this.getBank().getBankName(), "Bank name can't be null or empty");
-			Assert.hasLength(this.getBank().getIfscCode(), "Bank ifsc code can't be null or empty");
+			Bank bank = this.getBank();
+			if (bank.getBankId() == null || bank.getBankId() == 0) {
+				Assert.hasLength(this.getBank().getBankAddress(), "Bank address can't be null or empty");
+				Assert.hasLength(this.getBank().getBankName(), "Bank name can't be null or empty");
+				Assert.hasLength(this.getBank().getIfscCode(), "Bank ifsc code can't be null or empty");
+			}
 		} catch (IllegalArgumentException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
 		}

@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mybank.app.entity.Employee;
-import com.mybank.app.service.AuthorizedService;
 import com.mybank.app.service.AdminService;
+import com.mybank.app.service.AuthorizedService;
 import com.mybank.app.util.BankException;
+import com.mybank.app.util.DateUtil;
 import com.mybank.app.util.JSONUtil;
 import com.mybank.app.util.ResponseParser;
 
@@ -40,8 +41,10 @@ public class AdminController {
 
 	@Autowired
 	private AuthorizedService authorizedService;
+	
+	
 
-	@RequestMapping(value = "/add", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
+	@RequestMapping(value = "/addEmployee", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
 	public ResponseEntity<Object> addBankEmployee(@RequestBody Employee employee) {
 		this.LOGGER.info("add employee called with input {} ", employee.toString());
 		try {
@@ -70,7 +73,7 @@ public class AdminController {
 
 	}
 
-	@RequestMapping(value = "/delete", method = RequestMethod.DELETE, produces = "application/json")
+	@RequestMapping(value = "/deleteEmployee", method = RequestMethod.DELETE, produces = "application/json")
 	public ResponseEntity<Object> deleteBankEmployee(@RequestParam("employeeId") Long employeeId) {
 		this.LOGGER.info("delete employee request came for employee id {} ", employeeId);
 		try {

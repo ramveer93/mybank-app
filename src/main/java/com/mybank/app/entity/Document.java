@@ -17,6 +17,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import io.jsonwebtoken.lang.Assert;
 
@@ -45,18 +49,21 @@ public class Document {
 	private String docFormat;
 	
 	@Column(name = "created_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime createdOn = LocalDateTime.now();
 
 	@Column(name = "updated_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime updatedOn;
 
 	@Column(name = "deleted")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
 
 	public Long getDocId() {

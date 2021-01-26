@@ -1,5 +1,7 @@
 package com.mybank.app.controller;
 
+import java.util.List;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,5 +89,45 @@ public class EmployeeController {
 			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@RequestMapping(value = "/getCustomer", method = RequestMethod.GET, produces = "application/json")
+	public ResponseEntity<Object> getCustomerDetails(@RequestParam("customerId") Long customerId) {
+		try {
+			this.authorizedService.authorizeUser("EMPLOYEE");
+			Customer customer = this.customerService.getCustomerDetails(customerId);
+			JSONObject obj = this.jsonUtil.getJsonObjectFromObject(customer);
+			return new ResponseEntity<Object>(obj.toString(), HttpStatus.OK);
+		} catch (InsufficientAuthenticationException in) {
+			this.LOGGER.error(in.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
+					HttpStatus.UNAUTHORIZED);
+		} catch (Exception ex) {
+			this.LOGGER.info("Error occured in get customer  {} ", ex.getMessage());
+			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@RequestMapping(value = "/linkCustomerWithAccount", method = RequestMethod.PUT, produces = "application/json")
+	public ResponseEntity<Object> linkCustomerWithAccount(@RequestParam("customerId") Long customerId,
+			@RequestParam("accountIds") List<Long> accountIds) {
+		try {
+			this.authorizedService.authorizeUser("EMPLOYEE");
+			Customer updatedCustomer = this.customerService.linkCustomerWithAccounts(customerId,accountIds);
+			JSONObject obj = this.jsonUtil.getJsonObjectFromObject(updatedCustomer);
+			return new ResponseEntity<Object>(obj.toString(), HttpStatus.OK);
+		} catch (InsufficientAuthenticationException in) {
+			this.LOGGER.error(in.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
+					HttpStatus.UNAUTHORIZED);
+		} catch (Exception ex) {
+			this.LOGGER.info("Error occured in get customer  {} ", ex.getMessage());
+			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 }

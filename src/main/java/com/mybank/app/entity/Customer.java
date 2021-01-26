@@ -17,10 +17,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 @Entity
 @Table(name = "customer")
@@ -47,27 +49,30 @@ public class Customer {
 	@Column(name = "c_address")
 	private String customerAddress;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "c_banks_id", referencedColumnName = "c_id")
-	private List<Bank> banks;
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "c_banks_id")
+	private Bank bank;
 
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "cust_kyc")
 	private KYC kyc;
 
 	@Column(name = "created_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime createdOn = LocalDateTime.now();
 
 	@Column(name = "updated_on")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime updatedOn;
 
 	@Column(name = "deleted")
-	@DateTimeFormat(iso = ISO.DATE_TIME)
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
 
 	public Long getId() {
@@ -150,36 +155,34 @@ public class Customer {
 		this.kyc = kyc;
 	}
 
-	public List<Bank> getBanks() {
-		return banks;
+	public Bank getBank() {
+		return bank;
 	}
 
-	public void setBanks(List<Bank> banks) {
-		this.banks = banks;
+	public void setBank(Bank bank) {
+		this.bank = bank;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Customer [id=" + id + ", accounts=" + accounts + ", customerFirstName=" + customerFirstName
 				+ ", customerMiddleName=" + customerMiddleName + ", customerLastName=" + customerLastName
-				+ ", customerAddress=" + customerAddress + ", banks=" + banks + ", kyc=" + kyc + ", createdOn="
+				+ ", customerAddress=" + customerAddress + ", bank=" + bank + ", kyc=" + kyc + ", createdOn="
 				+ createdOn + ", updatedOn=" + updatedOn + ", deleted=" + deleted + "]";
 	}
-    
+
 	public void validateInput() {
 		try {
 			Assert.notNull(this, "Customer object can't be null");
 			Assert.hasLength(this.getCustomerAddress(), "Customer address can't be null or empty ");
 			Assert.hasLength(this.getCustomerFirstName(), "Customer first name can't be null or empty");
 			Assert.hasLength(this.getCustomerLastName(), "Customer last name can't be null or empty");
-			Assert.isTrue(!this.getBanks().isEmpty(), "Customer must have atleast one bank ");
-			List<Bank> banks = this.getBanks();
-			for (Bank bank : banks) {
+			Bank bank = this.getBank();
+			if (bank.getBankId() == null || bank.getBankId() == 0) {
 				Assert.hasLength(bank.getBankAddress(), "Bank must have an address");
 				Assert.hasLength(bank.getBankName(), "Bank must have a name");
 				Assert.hasLength(bank.getIfscCode(), "Bank must have an IFSC code");
 			}
-
 		} catch (IllegalArgumentException ex) {
 			throw new IllegalArgumentException(ex.getMessage());
 		}

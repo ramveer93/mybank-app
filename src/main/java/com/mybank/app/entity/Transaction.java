@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CollectionId;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
@@ -30,20 +31,26 @@ public class Transaction {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "trans_id")
 	private Long id;
-	
+
 	@Column(name = "amount")
 	private double amount;
-	
+
 	@Column(name = "status")
 	private String status;
-	
+
 	@Column(name = "receipt")
 	private String receipt;
+
+	@Column(name = "is_credit")
+	private boolean isCredit;
 	
-	@OneToOne(fetch  = FetchType.EAGER , cascade = CascadeType.ALL)
+	@Column(name = "is_debit")
+	private boolean isDebit;
+
+	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "trans_trans_type_codes")
 	private TransactionTypeCodes transTypeCodes;
-	
+
 	@Column(name = "created_on")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -61,14 +68,12 @@ public class Transaction {
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
-	
-	
+
 	@Column(name = "end_date")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime transactionEndDate;
-	
 
 	public Long getId() {
 		return id;
@@ -142,12 +147,30 @@ public class Transaction {
 		this.transactionEndDate = transactionEndDate;
 	}
 
+	public boolean isCredit() {
+		return isCredit;
+	}
+
+	public void setCredit(boolean isCredit) {
+		this.isCredit = isCredit;
+	}
+
+	public boolean isDebit() {
+		return isDebit;
+	}
+
+	public void setDebit(boolean isDebit) {
+		this.isDebit = isDebit;
+	}
+
 	@Override
 	public String toString() {
 		return "Transaction [id=" + id + ", amount=" + amount + ", status=" + status + ", receipt=" + receipt
-				+ ", transTypeCodes=" + transTypeCodes + ", createdOn=" + createdOn + ", updatedOn=" + updatedOn
-				+ ", deleted=" + deleted + ", transactionEndDate=" + transactionEndDate + "]";
+				+ ", isCredit=" + isCredit + ", isDebit=" + isDebit + ", transTypeCodes=" + transTypeCodes
+				+ ", createdOn=" + createdOn + ", updatedOn=" + updatedOn + ", deleted=" + deleted
+				+ ", transactionEndDate=" + transactionEndDate + "]";
 	}
 
 	
+
 }

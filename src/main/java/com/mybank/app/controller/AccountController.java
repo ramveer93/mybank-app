@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mybank.app.entity.Account;
 import com.mybank.app.service.AccountService;
 import com.mybank.app.service.AuthorizedService;
-import com.mybank.app.util.DateUtil;
 import com.mybank.app.util.JSONUtil;
 import com.mybank.app.util.ResponseParser;
 
@@ -82,6 +81,27 @@ public class AccountController {
 			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@RequestMapping(value = "/transferMoney", method = RequestMethod.PUT, produces = "application/json")
+	public ResponseEntity<Object> transferMoneyToAccount(@RequestParam("sourceAccountId") Long sourceAccountId,
+			@RequestParam("targetAccountId") Long targetAccountId, @RequestParam("money") double money) {
+
+		try {
+			this.authorizedService.authorizeUser("EMPLOYEE");
+			JSONObject result = this.accService.transferMoneyToAccount(sourceAccountId, targetAccountId, money);
+			return new ResponseEntity<Object>(result.toString(), HttpStatus.OK);
+		} catch (InsufficientAuthenticationException in) {
+			this.LOGGER.error(in.getMessage());
+			return new ResponseEntity<>(
+					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
+					HttpStatus.UNAUTHORIZED);
+		} catch (Exception ex) {
+			this.LOGGER.info("Error occured in transfering money  {} ", ex.getMessage());
+			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 }

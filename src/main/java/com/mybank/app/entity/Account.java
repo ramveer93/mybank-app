@@ -2,7 +2,9 @@ package com.mybank.app.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -52,9 +54,13 @@ public class Account {
 	@JoinColumn(name = "acc_ac_code_id")
 	private AccountType accType;
 
+//	@OneToMany(cascade = CascadeType.ALL)
+//	@JoinColumn(name = "ac_transaction_id")
+//	private List<Transaction> transactions = new ArrayList<>();
+	
 	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name = "ac_transaction_id", referencedColumnName = "acc_id")
-	private List<Transaction> transactions = new ArrayList<>();
+	@JoinColumn(name = "ac_trans_id", referencedColumnName = "acc_id")
+	private Set<Transaction> transactionsSet = new HashSet<>();
 
 	@Column(name = "created_on")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -138,14 +144,6 @@ public class Account {
 		this.deleted = deleted;
 	}
 
-	public List<Transaction> getTransactions() {
-		return transactions;
-	}
-
-	public void setTransactions(List<Transaction> transactions) {
-		this.transactions = transactions;
-	}
-
 	public Bank getBank() {
 		return bank;
 	}
@@ -154,11 +152,12 @@ public class Account {
 		this.bank = bank;
 	}
 
-	@Override
-	public String toString() {
-		return "Account [AccId=" + AccId + ", balance=" + balance + ", interestRate=" + interestRate + ", status="
-				+ status + ", bank=" + bank + ", accType=" + accType + ", transactions=" + transactions + ", createdOn="
-				+ createdOn + ", updatedOn=" + updatedOn + ", deleted=" + deleted + "]";
+	public Set<Transaction> getTransactionsSet() {
+		return transactionsSet;
+	}
+
+	public void setTransactionsSet(Set<Transaction> transactionsSet) {
+		this.transactionsSet = transactionsSet;
 	}
 
 	public void validateInput() {

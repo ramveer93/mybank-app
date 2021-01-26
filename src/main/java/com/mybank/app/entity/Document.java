@@ -59,6 +59,10 @@ public class Document {
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
+	
+	public Document() {
+		super();
+	}
 
 	public Long getDocId() {
 		return docId;

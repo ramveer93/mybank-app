@@ -18,6 +18,10 @@ public class EmployeeRole {
 
 	@Column(name = "role_name")
 	private String name;
+	
+	public EmployeeRole() {
+		super();
+	}
 
 	public Integer getId() {
 		return id;

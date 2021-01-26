@@ -1,6 +1,5 @@
 package com.mybank.app.controller;
 
-import java.util.List;
 import java.util.Set;
 
 import org.json.JSONObject;
@@ -95,6 +94,7 @@ public class EmployeeController {
 
 	@RequestMapping(value = "/getCustomer", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<Object> getCustomerDetails(@RequestParam("customerId") Long customerId) {
+		this.LOGGER.info("req to get customer with id {} ", customerId);
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			Customer customer = this.customerService.getCustomerDetails(customerId);
@@ -115,6 +115,7 @@ public class EmployeeController {
 	@RequestMapping(value = "/linkCustomerWithAccount", method = RequestMethod.PUT, produces = "application/json")
 	public ResponseEntity<Object> linkCustomerWithAccount(@RequestParam("customerId") Long customerId,
 			@RequestParam("accountIds") Set<Long> accountIds) {
+		this.LOGGER.info("req came for linking customer with account id {} ", customerId);
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			Customer updatedCustomer = this.customerService.linkCustomerWithAccounts(customerId, accountIds);
@@ -126,7 +127,7 @@ public class EmployeeController {
 					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
 					HttpStatus.UNAUTHORIZED);
 		} catch (Exception ex) {
-			this.LOGGER.info("Error occured in get customer  {} ", ex.getMessage());
+			this.LOGGER.info("Error occured in linkCustomerWithAccount  {} ", ex.getMessage());
 			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -135,6 +136,7 @@ public class EmployeeController {
 
 	@RequestMapping(value = "/updateKyc", method = RequestMethod.PUT, produces = "application/json")
 	public ResponseEntity<Object> updateCustomerKYC(@RequestParam("customerId") Long customerId, @RequestBody KYC kyc) {
+		this.LOGGER.info("Req to updateKyc for customer id {} ",customerId);
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			kyc.validateInput();

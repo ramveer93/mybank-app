@@ -53,6 +53,10 @@ public class Bank {
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
+	
+	public Bank() {
+		super();
+	}
 
 	public Long getBankId() {
 		return bankId;

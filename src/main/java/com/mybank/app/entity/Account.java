@@ -1,10 +1,6 @@
 package com.mybank.app.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,15 +10,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -54,14 +47,6 @@ public class Account {
 	@JoinColumn(name = "acc_ac_code_id")
 	private AccountType accType;
 
-//	@OneToMany(cascade = CascadeType.ALL)
-//	@JoinColumn(name = "ac_transaction_id")
-//	private List<Transaction> transactions = new ArrayList<>();
-	
-//	@OneToMany(cascade = CascadeType.ALL)
-//	@JoinColumn(name = "ac_trans_id", referencedColumnName = "acc_id")
-//	private Set<Transaction> transactionsSet = new HashSet<>();
-
 	@Column(name = "created_on")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -79,6 +64,10 @@ public class Account {
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
+
+	public Account() {
+		super();
+	}
 
 	public Long getAccId() {
 		return AccId;
@@ -151,14 +140,6 @@ public class Account {
 	public void setBank(Bank bank) {
 		this.bank = bank;
 	}
-
-//	public Set<Transaction> getTransactionsSet() {
-//		return transactionsSet;
-//	}
-//
-//	public void setTransactionsSet(Set<Transaction> transactionsSet) {
-//		this.transactionsSet = transactionsSet;
-//	}
 
 	public void validateInput() {
 		try {

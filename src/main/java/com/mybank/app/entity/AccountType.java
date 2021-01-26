@@ -20,6 +20,10 @@ public class AccountType {
 
 	@Column(name = "name")
 	private String name;
+	
+	public AccountType() {
+		super();
+	}
 
 	public Long getCode() {
 		return code;

@@ -3,7 +3,6 @@ package com.mybank.app.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,12 @@ public class AdminService {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
+	/**
+	 * This method will add a new employee 
+	 * if employee id is passed from input, this method will update the existing employee
+	 * @param employee
+	 * @return persisted employee
+	 */
 	public Employee addNewBankEmployee(Employee employee) {
 		this.LOGGER.debug("add bank employee request came in employee service {} ", employee);
 		if (employee.getId() != null && employee.getId() != 0) {
@@ -44,10 +49,8 @@ public class AdminService {
 				return employee;
 			}
 		}
-
 		Bank inputBank = employee.getBank();
 		if (inputBank != null && inputBank.getBankId() != null && inputBank.getBankId() != 0) {
-			// update bank dont create new
 			LOGGER.info("Found bankId in input so new bank won't be created");
 			Optional<Bank> bankFromDb = this.bankRepo.findById(inputBank.getBankId());
 			if (bankFromDb.isPresent()) {
@@ -65,10 +68,14 @@ public class AdminService {
 		fromDb.setUpdatedOn(LocalDateTime.now());
 		fromDb = this.empRepo.save(fromDb);
 		this.LOGGER.info("Successfully created employee details for id {} ", fromDb.getId());
-
 		return fromDb;
 	}
 
+	/**
+	 * This will delete existing employee
+	 * if the employee doesn't exist exception will be thrown
+	 * @param employeeId
+	 */
 	public void deleteEmployee(Long employeeId) {
 		this.LOGGER.info("delete employee request came in emp service with empId {} ", employeeId);
 		Optional<Employee> employeeFromDb = this.empRepo.findById(employeeId);

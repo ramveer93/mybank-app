@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.annotations.common.util.impl.LoggerFactory;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
@@ -26,10 +27,18 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @Component
 public class ReportingUtil {
-
-	public HttpServletResponse generateReport(List<Transaction> transactions, String reportName,
+	
+	/**
+	 * This method will generate pdf report using jasper report library
+	 * The method will also update the response to include generated report so the caller will
+	 * be forced to download the report
+	 * @param transactions is the data to be filled in report
+	 * @param reportName will be the 
+	 * @param response
+	 * @return HttpServletResponse
+	 */
+	public HttpServletResponse generateReport(List<Transaction> transactions,
 			HttpServletResponse response) {
-
 		try {
 			File file = ResourceUtils.getFile("classpath:acc_stattement.jrxml");
 			JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
@@ -37,11 +46,6 @@ public class ReportingUtil {
 			Map<String, Object> params = new HashMap<>();
 			params.put("createdBy", "MYBank");
 			JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
-
-			// URL outputPdfUrl = ResourceUtils.getURL("classpath:output/");
-			// File output = ResourceUtils.getFile("classpath:" + reportName);
-			// String path = outputPdfUrl.getPath() + "/" + reportName;
-			// Path outputfile = Paths.get(path, reportName);
 			JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
 			response.setContentType("application/pdf");
 			response.addHeader("Content-Disposition", "inline; filename=jasper.pdf;");
@@ -49,7 +53,5 @@ public class ReportingUtil {
 		} catch (Exception e) {
 			throw new BankException(e.getMessage());
 		}
-
 	}
-
 }

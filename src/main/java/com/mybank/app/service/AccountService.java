@@ -2,10 +2,8 @@ package com.mybank.app.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -54,6 +52,12 @@ public class AccountService {
 	@Autowired
 	private ReportingUtil reportUtil;
 
+	/**
+	 * This method will create a new account if account id is passed from input it
+	 * will try to find the account in db and update it
+	 * 
+	 * @Account: input account obj
+	 */
 	public Account createNewAccount(Account account) {
 		this.LOGGER.info("Account service got request to create new account");
 		if (account.getAccId() != null && account.getAccId() != 0) {
@@ -69,17 +73,13 @@ public class AccountService {
 				account.setUpdatedOn(LocalDateTime.now());
 				account.setCreatedOn(dbAccount.getCreatedOn());
 				account.setAccType(dbAccount.getAccType());
-				// account.setTransactionsSet(dbAccount.getTransactionsSet());
 				account = this.accountRepo.save(account);
 				this.LOGGER.info("Successfully updated existing account");
 				return account;
 			}
 		}
-
 		AccountType accType = account.getAccType();
-
 		if (accType != null && accType.getCode() != null && accType.getCode() != 0) {
-			// acc type code found so not creating new type
 			LOGGER.info("Found AccountTypeCode in req so not creating new ac type");
 			Optional<AccountType> accountFromDb = this.accTypeCodeRepo.findById(accType.getCode());
 			if (accountFromDb.isPresent()) {
@@ -87,14 +87,13 @@ public class AccountService {
 				account.setAccType(accType);
 				LOGGER.info("Successfully attached account {} to type code {} ", account.toString(), accType.getCode());
 			} else {
+				LOGGER.error("Account with given accId {} not found , No record will be created ", account.getAccId());
 				throw new BankException(
 						"Account with given accId " + account.getAccId() + " not found, No record will be created ");
 			}
-
 		}
 		Bank inputBank = account.getBank();
 		if (inputBank != null && inputBank.getBankId() != null && inputBank.getBankId() != 0) {
-			// update bank dont create new
 			LOGGER.info("Found bankId in input so new bank won't be created");
 			Optional<Bank> bankFromDb = this.bankRepo.findById(inputBank.getBankId());
 			if (bankFromDb.isPresent()) {
@@ -103,20 +102,25 @@ public class AccountService {
 				LOGGER.info("Successfully attached the employee {} to bank {} ", account.getAccId(),
 						inputBank.toString());
 			} else {
+				this.LOGGER.error("Bank with given bankId  {} not found ", inputBank.getBankId());
 				throw new BankException(
 						"Bank with given bankId " + inputBank.getBankId() + " not found, No record will be created ");
 			}
 		}
-
 		account = this.accountRepo.save(account);
 		this.LOGGER.info("Successfully updated existing account");
 		return account;
 	}
 
+	/**
+	 * This method will get account balance
+	 */
 	@Transactional(readOnly = true)
 	public JSONObject getAccountBalance(Long accountId) {
+		this.LOGGER.info("get account balance in service for {} ", accountId);
 		Optional<Account> accountFromDb = this.accountRepo.findById(accountId);
 		if (accountFromDb.isPresent()) {
+			this.LOGGER.info("account with id {} found in db ", accountId);
 			Account dbAccount = accountFromDb.get();
 			JSONObject result = new JSONObject();
 			double balance = dbAccount.getBalance();
@@ -124,11 +128,16 @@ public class AccountService {
 			result.put("accountType", dbAccount.getAccType().getName());
 			return result;
 		} else {
+			this.LOGGER.error("account with id {} not found in db ", accountId);
 			throw new BankException("Account with given id " + accountId + " not found, No record will be created ");
 		}
 	}
 
-	@Transactional()
+	/**
+	 * This method will transfer money from one account to another by transaction
+	 * 
+	 */
+	@Transactional
 	public JSONObject transferMoneyToAccount(Long sourceAccountId, Long targetAccountId, double money) {
 		Optional<Account> sourceDbAcc = this.accountRepo.findById(sourceAccountId);
 		Optional<Account> targetDbAcc = this.accountRepo.findById(targetAccountId);
@@ -137,9 +146,10 @@ public class AccountService {
 			Account sourceAccount = sourceDbAcc.get();
 			Account targetAccount = targetDbAcc.get();
 			if (money > sourceAccount.getBalance()) {
+				this.LOGGER.error("Source account doesn't have sufficient fund to transfer");
 				throw new BankException("Source account doesn't have sufficient fund to transfer");
 			} else {
-				// debit
+				this.LOGGER.info("Initiating transation to transfer money");
 				Transaction debitTrans = new Transaction();
 				debitTrans.setTransTypeCodes(new TransactionTypeCodes("Money Transfer Debited"));
 				debitTrans.setAmount(money);
@@ -148,22 +158,15 @@ public class AccountService {
 				debitTrans.setStatus("Success");
 				debitTrans.setTransactionEndDate(LocalDateTime.now());
 				debitTrans.setAccount(sourceAccount);
+				this.LOGGER.info("commited source account transaction");
+
 				debitTrans = this.transactionRepo.save(debitTrans);
-				try {
-					JSONObject jsonObj = jsonUtil.getJsonObjectFromObject(debitTrans);
-					System.out.println(jsonObj.toString());
-				} catch (Exception e) {
-
-				}
-
 				sourceAccount.setBalance(sourceAccount.getBalance() - money);
-//				Set<Transaction> sourceTransSet = new HashSet<>();
-//				sourceTransSet.add(debitTrans);
-				// sourceAccount.setTransactionsSet(sourceTransSet);
 				sourceAccount.setUpdatedOn(LocalDateTime.now());
-				sourceAccount = this.accountRepo.save(sourceAccount);// commit to source
-
+				sourceAccount = this.accountRepo.save(sourceAccount);
+				this.LOGGER.info("successfully updated source ac details");
 				// credit
+				this.LOGGER.info("initiating transaction in target account");
 				Transaction creditTrans = new Transaction();
 				creditTrans.setTransTypeCodes(new TransactionTypeCodes("Money Transfer Credited"));
 				creditTrans.setAmount(money);
@@ -173,24 +176,32 @@ public class AccountService {
 				creditTrans.setAccount(targetAccount);
 				creditTrans.setTransactionEndDate(LocalDateTime.now());
 				creditTrans = this.transactionRepo.save(creditTrans);
+				this.LOGGER.info("successfully commited target account transaction");
 
 				targetAccount.setBalance(targetAccount.getBalance() + money);
-				// Set<Transaction> targetTransSet = new HashSet<>();
-				// targetTransSet.add(creditTrans);
-				// targetAccount.setTransactionsSet(targetTransSet);
 				targetAccount.setUpdatedOn(LocalDateTime.now());
 				targetAccount = this.accountRepo.save(targetAccount);
 				result.put("status", "Success");
 				result.put("sourceTransactionId", debitTrans.getId());
 				result.put("targetTransactionId", creditTrans.getId());
+				this.LOGGER.info("successfully saved target account details");
+				this.LOGGER.info(
+						"transaction completed successfully with source transaction id {} and target transaction id {} ",
+						debitTrans.getId(), creditTrans.getId());
 				return result;
 			}
 		} else {
+			this.LOGGER.error("Either source or target account doesn't exists,not able to make the transaction");
 			throw new BankException("Either source or target account doesn't exists,not able to make the transaction");
 		}
 	}
 
-	// @Scheduled(cron = "* */2 * * * *", zone = "Asia/Calcutta")
+	/**
+	 * This method will run in a scheduled manner to update all the accounts with interest 
+	 * rate they earned
+	 * 
+	 */
+	@Scheduled(cron = "* */2 * * * *", zone = "Asia/Calcutta")
 	public void calculateInterest() {
 		LOGGER.info("Scheduler started at {} ", LocalDateTime.now());
 		List<Account> accounts = this.accountRepo.findAll();
@@ -221,7 +232,7 @@ public class AccountService {
 	public HttpServletResponse printReport(Long accountId, LocalDateTime startDate, LocalDateTime endDate,
 			HttpServletResponse response) {
 		List<Transaction> transactions = this.transactionRepo.findInDateRange(accountId, startDate);
-		return this.reportUtil.generateReport(transactions, "firstReport.pdf", response);
+		return this.reportUtil.generateReport(transactions, response);
 	}
 
 }

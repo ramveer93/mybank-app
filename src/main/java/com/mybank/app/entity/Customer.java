@@ -1,9 +1,7 @@
 package com.mybank.app.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -76,6 +74,10 @@ public class Customer {
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDateTime deleted;
+	
+	public Customer() {
+		super();
+	}
 
 	public Long getId() {
 		return id;

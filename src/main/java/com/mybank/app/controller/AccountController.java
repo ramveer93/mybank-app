@@ -65,7 +65,7 @@ public class AccountController {
 					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
 					HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
-			this.LOGGER.error("Error occured in add customer {} ", e.getMessage());
+			this.LOGGER.error("Error occured in create account {} ", e.getMessage());
 			return new ResponseEntity<>(
 					this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -75,9 +75,11 @@ public class AccountController {
 
 	@RequestMapping(value = "/getBalance", method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<Object> getAccountBalance(@RequestParam("accountId") Long accountId) {
+		this.LOGGER.info("Request came for getAccountBalance with acId {} ",accountId);
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			JSONObject result = this.accService.getAccountBalance(accountId);
+			this.LOGGER.info("Successfully returned account balance with acId {} ",accountId);
 			return new ResponseEntity<Object>(result.toString(), HttpStatus.OK);
 		} catch (InsufficientAuthenticationException in) {
 			this.LOGGER.error(in.getMessage());
@@ -85,7 +87,7 @@ public class AccountController {
 					this.responseParser.build(HttpStatus.UNAUTHORIZED.value(), in.getMessage(), in.getMessage()),
 					HttpStatus.UNAUTHORIZED);
 		} catch (Exception ex) {
-			this.LOGGER.info("Error occured in get customer  {} ", ex.getMessage());
+			this.LOGGER.info("Error occured in get balance  {} ", ex.getMessage());
 			return new ResponseEntity<Object>(this.responseParser.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 					ex.getMessage(), ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -94,10 +96,11 @@ public class AccountController {
 	@RequestMapping(value = "/transferMoney", method = RequestMethod.PUT, produces = "application/json")
 	public ResponseEntity<Object> transferMoneyToAccount(@RequestParam("sourceAccountId") Long sourceAccountId,
 			@RequestParam("targetAccountId") Long targetAccountId, @RequestParam("money") double money) {
-
+			this.LOGGER.info("Request came for transfer money with source ac {}, targtet ac {} and money {}",sourceAccountId,targetAccountId,money);
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			JSONObject result = this.accService.transferMoneyToAccount(sourceAccountId, targetAccountId, money);
+			this.LOGGER.info("Successfully transfered money!!");
 			return new ResponseEntity<Object>(result.toString(), HttpStatus.OK);
 		} catch (InsufficientAuthenticationException in) {
 			this.LOGGER.error(in.getMessage());
@@ -116,6 +119,7 @@ public class AccountController {
 	public ResponseEntity<Object> printAccountStatement(@RequestParam("accountId") Long accountId,
 			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
 			@RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+		this.LOGGER.info("Req came to get account statement for start date {},endDate {} ",startDate,endDate);
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			List<Transaction> list = this.accService.printAccountStatement(accountId, startDate, endDate);
@@ -138,7 +142,9 @@ public class AccountController {
 	public void generatePDFReport(HttpServletResponse response, @RequestParam("accountId") Long accountId,
 			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
 			@RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+		this.LOGGER.info("Req came to generate pdf report for account statement ");
 		response = this.accService.printReport(accountId, startDate, endDate, response);
+		this.LOGGER.info("Successfully generated pdf report  ");
 	}
 
 }

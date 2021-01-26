@@ -1,6 +1,7 @@
 package com.mybank.app.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -112,7 +113,7 @@ public class EmployeeController {
 
 	@RequestMapping(value = "/linkCustomerWithAccount", method = RequestMethod.PUT, produces = "application/json")
 	public ResponseEntity<Object> linkCustomerWithAccount(@RequestParam("customerId") Long customerId,
-			@RequestParam("accountIds") List<Long> accountIds) {
+			@RequestParam("accountIds") Set<Long> accountIds) {
 		try {
 			this.authorizedService.authorizeUser("EMPLOYEE");
 			Customer updatedCustomer = this.customerService.linkCustomerWithAccounts(customerId,accountIds);
@@ -130,4 +131,5 @@ public class EmployeeController {
 		}
 
 	}
+	
 }

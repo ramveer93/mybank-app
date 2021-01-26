@@ -1,9 +1,9 @@
 package com.mybank.app.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,12 +89,12 @@ public class CustomerService {
 		}
 	}
 
-	public Customer linkCustomerWithAccounts(Long customerId, List<Long> accountIds) {
+	public Customer linkCustomerWithAccounts(Long customerId, Set<Long> accountIds) {
 		Optional<Customer> customer = this.customerRepo.findById(customerId);
 		Customer customerFromDb = null;
 		if (customer.isPresent()) {
 			customerFromDb = customer.get();
-			List<Account> accounts = new ArrayList<>();
+			Set<Account> accounts = new HashSet<>();
 			for (Long acId : accountIds) {
 				Optional<Account> accounFromDb = this.accRepo.findById(acId);
 				if (accounFromDb.isPresent()) {
@@ -102,7 +102,7 @@ public class CustomerService {
 				} else {
 					throw new BankException("No account found with given id  " + acId);
 				}
-				customerFromDb.setAccounts(accounts);
+				customerFromDb.getAccounts().addAll(accounts);
 				customerFromDb = this.customerRepo.save(customerFromDb);
 			}
 		} else {

@@ -2,7 +2,9 @@ package com.mybank.app.entity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -35,7 +37,7 @@ public class Customer {
 
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name = "c_ac_id", referencedColumnName = "c_id")
-	private List<Account> accounts = new ArrayList<>();
+	private Set<Account> accounts = new HashSet<>();
 
 	@Column(name = "c_first_name")
 	private String customerFirstName;
@@ -81,14 +83,6 @@ public class Customer {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public List<Account> getAccounts() {
-		return accounts;
-	}
-
-	public void setAccounts(List<Account> accounts) {
-		this.accounts = accounts;
 	}
 
 	public String getCustomerFirstName() {
@@ -162,6 +156,14 @@ public class Customer {
 	public void setBank(Bank bank) {
 		this.bank = bank;
 	}
+	
+	public Set<Account> getAccounts() {
+		return accounts;
+	}
+
+	public void setAccounts(Set<Account> accounts) {
+		this.accounts = accounts;
+	}
 
 	@Override
 	public String toString() {
@@ -187,5 +189,4 @@ public class Customer {
 			throw new IllegalArgumentException(ex.getMessage());
 		}
 	}
-
 }

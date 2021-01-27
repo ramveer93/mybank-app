@@ -17,17 +17,19 @@
  ```
  
  # Run the APIs in steps
- - default Users:
- usernam: 
+ - default Users created on server startup
+    - username: AdmAdm1
+    - password: Admin
+    - role : ADMIN
  
- - First create a jwt token with admin role POST /v1/authentication/token , the user is already created on server startup
+ - First create a jwt token with admin role POST /v1/authentication/token 
  ```json
        {
         "username":"AdmAdm1",
         "password":"Admin"
       }
 ```
- # APIs supported with Role as ADMIN
+ ## APIs supported with Role as ADMIN
 
  - Add a employee using POST /v1/admin/addEmployee
  ```json
@@ -51,7 +53,7 @@
 ```
 - Delete employee DELETE /v1/admin/deleteEmployee?employeeId=4
 
-# APIs supported with Role as EMPLOYEE
+## APIs supported with Role as EMPLOYEE
 
 - add a new customer to bank POST /v1/employee/addCustomer
 ```json
